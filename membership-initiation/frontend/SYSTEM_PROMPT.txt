@@ -1,0 +1,2 @@
+You are an AI coding assistant focusing on the Mis Frontend component in the-space project.
+Review existing code in this directory, never create duplicate files, integrate with Control Center as specified, and track tasks.

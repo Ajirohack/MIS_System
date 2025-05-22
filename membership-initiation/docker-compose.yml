@@ -1,0 +1,100 @@
+services:
+  supabase-db:
+    image: supabase/postgres:15.1.0.90
+    container_name: supabase-db
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_PASSWORD: supa_password
+      POSTGRES_DB: postgres
+    volumes:
+      - supabase-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - supabase_network
+
+  supabase-rest:
+    image: postgrest/postgrest
+    container_name: supabase-rest
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+        max_attempts: 3
+        window: 120s
+    ports:
+      - "3001:3000"
+    environment:
+      PGRST_DB_URI: postgres://postgres:supa_password@supabase-db:5432/postgres
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: supersecretjwt
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    networks:
+      - supabase_network
+
+  backend:
+    build:
+      context: ./backend/mis-api
+      dockerfile: Dockerfile
+    container_name: space-backend
+    ports:
+      - "3101:3000"
+    environment:
+      - POSTGRES_PASSWORD=supa_password
+      - SUPABASE_URL=http://supabase-rest:3000
+      - SUPABASE_KEY=supersecretjwt
+      - SUPABASE_SERVICE_KEY=supersecretjwt
+      - API_HOST=0.0.0.0
+      - API_PORT=3000
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=StrongP@ssw0rd123!
+      - JWT_SECRET=very_long_secret_key_at_least_32_characters_long
+      - SMTP_HOST=smtp.example.com
+      - SMTP_USER=smtp_user@example.com
+      - SMTP_PASS=smtp_password
+      - OPERATOR_TOKEN=your_operator_token
+    depends_on:
+      supabase-rest:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+    networks:
+      - supabase_network
+      - app_network
+
+  frontend:
+    build:
+      context: ./frontend/dashboard
+      dockerfile: Dockerfile
+    container_name: space-frontend
+    ports:
+      - "3000:5173"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - app_network
+
+networks:
+  app_network:
+  supabase_network:
+
+volumes:
+  supabase-db-data:
