@@ -1,0 +1,88 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: mis_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: misuser
+      POSTGRES_PASSWORD: mispassword
+      POSTGRES_DB: misdb
+    ports:
+      - '5434:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - misnet
+
+  redis:
+    image: redis:7
+    container_name: mis_redis
+    restart: unless-stopped
+    ports:
+      - '6381:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - misnet
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: mis_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@mis.local
+      PGADMIN_DEFAULT_PASSWORD: admin1234
+    ports:
+      - '8080:80'
+    depends_on:
+      - postgres
+    networks:
+      - misnet
+
+  redisinsight:
+    image: redislabs/redisinsight:latest
+    container_name: mis_redisinsight
+    restart: unless-stopped
+    ports:
+      - '8001:8001'
+    depends_on:
+      - redis
+    networks:
+      - misnet
+
+  # Tenant Management Service
+  tenant-service:
+    build:
+      context: .
+      dockerfile: services/tenant-service/Dockerfile
+    container_name: mis_tenant_service
+    restart: unless-stopped
+    ports:
+      - '3006:3006'
+    environment:
+      NODE_ENV: development
+      PORT: 3006
+      DATABASE_URL: postgresql://misuser:mispassword@postgres:5432/misdb
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: your-super-secret-jwt-key-tenant-service
+      CORS_ORIGIN: http://localhost:3000,http://localhost:3001
+      LOG_LEVEL: info
+      BASE_URL: http://localhost:3006
+    volumes:
+      - ./services/tenant-service:/app
+      - /app/node_modules
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - misnet
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  misnet:
+    driver: bridge 
