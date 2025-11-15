@@ -73,27 +73,6 @@ npm test
 npm run build
 ```
 
-## E2E Testing (Cypress)
-
-This project uses [Cypress](https://www.cypress.io/) for end-to-end (E2E) testing.
-
-- E2E tests are located in `cypress/e2e/`.
-- To run Cypress in interactive mode:
-
-  ```bash
-  npx cypress open
-  ```
-
-- To run all E2E tests headlessly:
-
-  ```bash
-  npx cypress run
-  ```
-
-- Example test: `cypress/e2e/sample-registration.cy.ts`
-
-For configuration, see `cypress.config.js`.
-
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
@@ -148,29 +127,3 @@ export default tseslint.config({
   },
 })
 ```
-
-## CI/CD Pipeline
-
-This project uses GitHub Actions for automated testing, build, and deployment. The pipeline includes:
-
-- Linting
-- Unit tests with coverage
-- Cypress E2E tests
-- Build step
-- Deployment (placeholder)
-
-See `.github/workflows/ci.yml` for details.
-
-## E2E Test Coverage
-
-Critical user flows covered:
-
-- Registration
-- Login/Authentication
-- Profile management
-- Onboarding
-- Settings
-- Cross-platform connection
-- Error handling
-
-See `cypress/e2e/` for test specs.

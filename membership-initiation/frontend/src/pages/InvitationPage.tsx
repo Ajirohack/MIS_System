@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import axios from "axios";
 
 // Import components
 import { Container } from "../components/setup";
@@ -15,18 +14,16 @@ import {
 } from "../components/ui";
 
 // Import API configuration
-import { API_ENDPOINTS } from "../config/api";
+ 
 
 // Timer duration in seconds (3 hours)
 const SESSION_DURATION = 3 * 60 * 60;
 
-interface InvitationParams {
-  invitationId?: string;
-}
+ 
 
 const InvitationPage: React.FC = () => {
   const navigate = useNavigate();
-  const { invitationId } = useParams<InvitationParams>();
+  const { invitationId } = useParams<{ invitationId?: string }>();
 
   // Form state
   const [invitationCode, setInvitationCode] = useState("");

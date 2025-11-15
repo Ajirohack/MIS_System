@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # Tenant Management Service
+  tenant-service:
+    build:
+      context: .
+      dockerfile: services/tenant-service/Dockerfile
+    container_name: mis-tenant-service
+    ports:
+      - "3006:3006"
+    environment:
+      - NODE_ENV=development
+      - PORT=3006
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/mis_db
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=your-super-secret-jwt-key-tenant-service
+      - CORS_ORIGIN=http://localhost:3000,http://localhost:3001
+      - LOG_LEVEL=info
+      - BASE_URL=http://localhost:3006
+    volumes:
+      - ./services/tenant-service:/app
+      - /app/node_modules
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - mis-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3006/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Tenant Service Database Migrations
+  tenant-service-migrations:
+    build:
+      context: .
+      dockerfile: services/tenant-service/Dockerfile
+    container_name: mis-tenant-service-migrations
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/mis_db
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+    networks:
+      - mis-network
+    command: ["npm", "run", "migrate"]
+    restart: "no"
+
+  # Tenant Service Tests
+  tenant-service-tests:
+    build:
+      context: .
+      dockerfile: services/tenant-service/Dockerfile
+    container_name: mis-tenant-service-tests
+    environment:
+      - NODE_ENV=test
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/mis_test_db
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=test-jwt-secret
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - mis-network
+    command: ["npm", "test"]
+    restart: "no"
+
+networks:
+  mis-network:
+    external: true 

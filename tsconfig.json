@@ -1,0 +1,63 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "lib": ["ES2022"],
+    "allowJs": true,
+    "outDir": "./dist",
+    "rootDir": "./",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": false,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": false,
+    "noUncheckedIndexedAccess": true,
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["shared/*"],
+      "@shared/utils/*": ["shared/utils/*"],
+      "@shared/models/*": ["shared/models/*"],
+      "@shared/middleware/*": ["shared/middleware/*"],
+      "@services/*": ["services/*"],
+      "@frontend/*": ["frontend/*"],
+      "@config/*": ["config/*"],
+      "@infrastructure/*": ["infrastructure/*"]
+    }
+  },
+  "include": [
+    "services/**/*",
+    "shared/**/*",
+    "frontend/**/*",
+    "mobile-app/**/*",
+    "config/**/*",
+    "infrastructure/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "coverage",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ],
+  "references": [
+    { "path": "./services/auth-service" },
+    { "path": "./services/invitation-service" },
+    { "path": "./services/member-service" },
+    { "path": "./services/media-service" },
+    { "path": "./services/audit-service" },
+    { "path": "./shared" }
+  ]
+} 

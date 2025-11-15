@@ -1,14 +1,19 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import axios from "axios";
 
 // Import components
 import { Container } from "../components/setup";
-import { Card, Button, Input, TextArea, Alert, Spinner } from "../components/ui";
+import {
+  Card,
+  Button,
+  Input,
+  TextArea,
+  Alert,
+  Spinner,
+} from "../components/ui";
 
 // Import API configuration
-import { API_ENDPOINTS } from "../config/api";
 
 interface RegistrationFormData {
   firstName: string;
@@ -46,8 +51,10 @@ const MAX_PHOTO_SIZE_MB = 5; // Maximum photo size in MB
 const RegistrationPage: React.FC = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  const [invitationData, setInvitationData] = useState<InvitationData | null>(null);
+
+  const [invitationData, setInvitationData] = useState<InvitationData | null>(
+    null
+  );
   const [formData, setFormData] = useState<RegistrationFormData>({
     firstName: "",
     lastName: "",
@@ -65,64 +72,67 @@ const RegistrationPage: React.FC = () => {
     referenceDetails: "",
     profilePhotos: [],
   });
-  
+
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [isLoading, setIsLoading] = useState(false);
   const [photoErrors, setPhotoErrors] = useState<string[]>([]);
-  const [photoFiles, setPhotoFiles] = useState<{ file: File; preview: string }[]>([]);
+  const [photoFiles, setPhotoFiles] = useState<
+    { file: File; preview: string }[]
+  >([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
-  
+
   // Check for existing invitation data on mount
   useEffect(() => {
     const invitationDataStr = sessionStorage.getItem("invitationData");
     const sessionStartTime = sessionStorage.getItem("invitationSessionStart");
-    
+
     if (!invitationDataStr || !sessionStartTime) {
-      toast.error("No valid invitation found. Please complete the invitation process.");
+      toast.error(
+        "No valid invitation found. Please complete the invitation process."
+      );
       navigate("/invitation");
       return;
     }
-    
+
     try {
       const parsedData = JSON.parse(invitationDataStr);
       setInvitationData(parsedData);
-      
+
       // Pre-fill form data if available
       if (parsedData.name) {
         const nameParts = parsedData.name.split(" ");
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           firstName: nameParts[0] || "",
           lastName: nameParts.slice(1).join(" ") || "",
         }));
       }
-      
+
       if (parsedData.emailAddress) {
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           email: parsedData.emailAddress,
         }));
       }
-      
+
       // Calculate remaining session time
       const startTime = parseInt(sessionStartTime, 10);
       const currentTime = Math.floor(Date.now() / 1000);
       const sessionDuration = 3 * 60 * 60; // 3 hours in seconds
       const remaining = sessionDuration - (currentTime - startTime);
-      
+
       if (remaining <= 0) {
         // Session expired
         toast.error("Your session has expired. Please start over.");
         navigate("/invitation");
         return;
       }
-      
+
       setTimeRemaining(remaining);
-      
+
       // Start countdown
       const interval = setInterval(() => {
-        setTimeRemaining(prev => {
+        setTimeRemaining((prev) => {
           if (prev === null || prev <= 1) {
             clearInterval(interval);
             toast.error("Your session has expired. Please start over.");
@@ -132,71 +142,72 @@ const RegistrationPage: React.FC = () => {
           return prev - 1;
         });
       }, 1000);
-      
+
       return () => clearInterval(interval);
-      
     } catch (err) {
       console.error("Error parsing invitation data:", err);
       toast.error("Invalid invitation data. Please start over.");
       navigate("/invitation");
     }
   }, [navigate]);
-  
+
   // Format seconds to HH:MM:SS
   const formatTime = (seconds: number): string => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    
+
     return [
       hours.toString().padStart(2, "0"),
       minutes.toString().padStart(2, "0"),
       secs.toString().padStart(2, "0"),
     ].join(":");
   };
-  
+
   // Handle form input changes
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    
-    setFormData(prev => ({
+
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-    
+
     // Clear error for this field if it exists
     if (errors[name]) {
-      setErrors(prev => {
+      setErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors[name];
         return newErrors;
       });
     }
   };
-  
+
   // Handle photo upload
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-    
+
     const newPhotoErrors: string[] = [];
     const newPhotos: { file: File; preview: string }[] = [...photoFiles];
-    
-    Array.from(files).forEach(file => {
+
+    Array.from(files).forEach((file) => {
       // Check if maximum photos reached
       if (newPhotos.length >= MAX_PHOTOS) {
-        newPhotoErrors.push(`You can only upload a maximum of ${MAX_PHOTOS} photos.`);
+        newPhotoErrors.push(
+          `You can only upload a maximum of ${MAX_PHOTOS} photos.`
+        );
         return;
       }
-      
+
       // Check if file is an image
       if (!file.type.startsWith("image/")) {
         newPhotoErrors.push(`File "${file.name}" is not an image.`);
         return;
       }
-      
+
       // Check file size
       const fileSizeMB = file.size / (1024 * 1024);
       if (fileSizeMB > MAX_PHOTO_SIZE_MB) {
@@ -205,7 +216,7 @@ const RegistrationPage: React.FC = () => {
         );
         return;
       }
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -215,34 +226,34 @@ const RegistrationPage: React.FC = () => {
       };
       reader.readAsDataURL(file);
     });
-    
+
     // Update photo errors
     setPhotoErrors(newPhotoErrors);
-    
+
     // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
-  
+
   // Remove a photo
   const handleRemovePhoto = (index: number) => {
     const newPhotos = [...photoFiles];
     newPhotos.splice(index, 1);
     setPhotoFiles(newPhotos);
   };
-  
+
   // Trigger file input click
   const handleAddPhotoClick = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
-  
+
   // Validate form data
   const validateForm = (): boolean => {
     const newErrors: { [key: string]: string } = {};
-    
+
     // Required fields
     const requiredFields: (keyof RegistrationFormData)[] = [
       "firstName",
@@ -257,55 +268,58 @@ const RegistrationPage: React.FC = () => {
       "postalCode",
       "country",
     ];
-    
-    requiredFields.forEach(field => {
+
+    requiredFields.forEach((field) => {
       if (!formData[field]) {
         newErrors[field] = "This field is required";
       }
     });
-    
+
     // Email validation
     if (formData.email && !/^\S+@\S+\.\S+$/.test(formData.email)) {
       newErrors.email = "Please enter a valid email address";
     }
-    
+
     // Phone validation
-    if (formData.phoneNumber && !/^\+?[\d\s()-]{8,20}$/.test(formData.phoneNumber)) {
+    if (
+      formData.phoneNumber &&
+      !/^\+?[\d\s()-]{8,20}$/.test(formData.phoneNumber)
+    ) {
       newErrors.phoneNumber = "Please enter a valid phone number";
     }
-    
+
     // Date validation
     if (formData.dateOfBirth) {
       const birthDate = new Date(formData.dateOfBirth);
       const now = new Date();
       const minAge = 18;
-      
+
       // Check if birthDate is valid and user is at least minAge years old
       if (isNaN(birthDate.getTime())) {
         newErrors.dateOfBirth = "Please enter a valid date";
       } else {
         const ageDate = new Date(now.getTime() - birthDate.getTime());
         const age = Math.abs(ageDate.getUTCFullYear() - 1970);
-        
+
         if (age < minAge) {
           newErrors.dateOfBirth = `You must be at least ${minAge} years old`;
         }
       }
     }
-    
+
     // Check if at least one photo is uploaded
     if (photoFiles.length === 0) {
       newErrors.profilePhotos = "Please upload at least one profile photo";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  
+
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       // Scroll to the first error
       const firstErrorField = document.querySelector("[data-error='true']");
@@ -314,9 +328,9 @@ const RegistrationPage: React.FC = () => {
       }
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     try {
       // In a real implementation, we would send the form data to the API
       // const formDataToSend = new FormData();
@@ -325,19 +339,19 @@ const RegistrationPage: React.FC = () => {
       //     formDataToSend.append(key, value);
       //   }
       // });
-      
+
       // photoFiles.forEach(({ file }) => {
       //   formDataToSend.append("profilePhotos", file);
       // });
-      
+
       // formDataToSend.append("invitationId", invitationData?.invitationId || "");
       // formDataToSend.append("invitationCode", invitationData?.code || "");
-      
+
       // const response = await axios.post(API_ENDPOINTS.SUBMIT_REGISTRATION, formDataToSend);
-      
+
       // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       // Store registration data for next step
       const registrationData = {
         ...formData,
@@ -347,27 +361,27 @@ const RegistrationPage: React.FC = () => {
         invitationCode: invitationData?.code,
         submittedAt: new Date().toISOString(),
       };
-      
+
       sessionStorage.setItem(
         "registrationData",
         JSON.stringify(registrationData)
       );
-      
+
       toast.success("Registration information saved successfully!");
-      
+
       // Navigate to oath page
       navigate("/oath");
-      
     } catch (err: any) {
       console.error("Error submitting registration:", err);
       toast.error(
-        err.response?.data?.message || "An error occurred while submitting your registration. Please try again."
+        err.response?.data?.message ||
+          "An error occurred while submitting your registration. Please try again."
       );
     } finally {
       setIsSubmitting(false);
     }
   };
-  
+
   return (
     <Container currentPage="Registration">
       <div className="max-w-4xl mx-auto">
@@ -377,7 +391,9 @@ const RegistrationPage: React.FC = () => {
             {timeRemaining !== null && (
               <div className="bg-blue-50 border border-blue-200 rounded-md px-4 py-2">
                 <div className="flex items-center">
-                  <span className="text-blue-700 text-xs mr-2">Time Remaining:</span>
+                  <span className="text-blue-700 text-xs mr-2">
+                    Time Remaining:
+                  </span>
                   <span className="font-mono text-blue-800 font-medium text-sm">
                     {formatTime(timeRemaining)}
                   </span>
@@ -385,19 +401,24 @@ const RegistrationPage: React.FC = () => {
               </div>
             )}
           </div>
-          
+
           {invitationData?.reason && (
             <div className="bg-amber-50 border border-amber-200 rounded-md p-4 mb-8">
-              <h3 className="font-medium text-amber-800 mb-2">Why You Were Invited</h3>
+              <h3 className="font-medium text-amber-800 mb-2">
+                Why You Were Invited
+              </h3>
               <p className="text-amber-700">{invitationData.reason}</p>
               {invitationData.invitedBy && (
                 <p className="mt-2 text-amber-800 text-sm">
-                  Invited by: <span className="font-medium">{invitationData.invitedBy}</span>
+                  Invited by:{" "}
+                  <span className="font-medium">
+                    {invitationData.invitedBy}
+                  </span>
                 </p>
               )}
             </div>
           )}
-          
+
           <form onSubmit={handleSubmit}>
             <div className="mb-8">
               <h3 className="text-lg font-medium mb-4">Personal Information</h3>
@@ -411,7 +432,7 @@ const RegistrationPage: React.FC = () => {
                   required
                   data-error={!!errors.firstName}
                 />
-                
+
                 <Input
                   label="Last Name"
                   name="lastName"
@@ -421,7 +442,7 @@ const RegistrationPage: React.FC = () => {
                   required
                   data-error={!!errors.lastName}
                 />
-                
+
                 <Input
                   label="Email Address"
                   name="email"
@@ -432,7 +453,7 @@ const RegistrationPage: React.FC = () => {
                   required
                   data-error={!!errors.email}
                 />
-                
+
                 <Input
                   label="Phone Number"
                   name="phoneNumber"
@@ -442,7 +463,7 @@ const RegistrationPage: React.FC = () => {
                   required
                   data-error={!!errors.phoneNumber}
                 />
-                
+
                 <Input
                   label="Date of Birth"
                   name="dateOfBirth"
@@ -453,7 +474,7 @@ const RegistrationPage: React.FC = () => {
                   required
                   data-error={!!errors.dateOfBirth}
                 />
-                
+
                 <Input
                   label="Occupation"
                   name="occupation"
@@ -465,7 +486,7 @@ const RegistrationPage: React.FC = () => {
                 />
               </div>
             </div>
-            
+
             <div className="mb-8">
               <h3 className="text-lg font-medium mb-4">Address</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -480,7 +501,7 @@ const RegistrationPage: React.FC = () => {
                     data-error={!!errors.addressLine1}
                   />
                 </div>
-                
+
                 <div className="md:col-span-2">
                   <Input
                     label="Address Line 2"
@@ -490,7 +511,7 @@ const RegistrationPage: React.FC = () => {
                     error={errors.addressLine2}
                   />
                 </div>
-                
+
                 <Input
                   label="City"
                   name="city"
@@ -500,7 +521,7 @@ const RegistrationPage: React.FC = () => {
                   required
                   data-error={!!errors.city}
                 />
-                
+
                 <Input
                   label="State/Province"
                   name="state"
@@ -510,7 +531,7 @@ const RegistrationPage: React.FC = () => {
                   required
                   data-error={!!errors.state}
                 />
-                
+
                 <Input
                   label="Postal Code"
                   name="postalCode"
@@ -520,7 +541,7 @@ const RegistrationPage: React.FC = () => {
                   required
                   data-error={!!errors.postalCode}
                 />
-                
+
                 <Input
                   label="Country"
                   name="country"
@@ -532,9 +553,11 @@ const RegistrationPage: React.FC = () => {
                 />
               </div>
             </div>
-            
+
             <div className="mb-8">
-              <h3 className="text-lg font-medium mb-4">Additional Information</h3>
+              <h3 className="text-lg font-medium mb-4">
+                Additional Information
+              </h3>
               <div className="grid grid-cols-1 gap-4">
                 <TextArea
                   label="Biography"
@@ -545,7 +568,7 @@ const RegistrationPage: React.FC = () => {
                   placeholder="Tell us about yourself, your background, interests, and aspirations."
                   helper="This information helps us better understand your fit with our community."
                 />
-                
+
                 <TextArea
                   label="Reference Details"
                   name="referenceDetails"
@@ -557,11 +580,12 @@ const RegistrationPage: React.FC = () => {
                 />
               </div>
             </div>
-            
+
             <div className="mb-8">
               <h3 className="text-lg font-medium mb-4">Profile Photos</h3>
               <p className="text-gray-600 text-sm mb-4">
-                Please upload up to {MAX_PHOTOS} clear photos of yourself. These will be used for identification purposes.
+                Please upload up to {MAX_PHOTOS} clear photos of yourself. These
+                will be used for identification purposes.
               </p>
               {photoErrors.length > 0 && (
                 <Alert type="error" className="mb-4">
@@ -579,8 +603,7 @@ const RegistrationPage: React.FC = () => {
                 {photoFiles.map((photo, index) => (
                   <div
                     key={index}
-                    className="w-32 h-32 relative rounded-md overflow-hidden border border-gray-300"
-                  >
+                    className="w-32 h-32 relative rounded-md overflow-hidden border border-gray-300">
                     <img
                       src={photo.preview}
                       alt={`Profile photo ${index + 1}`}
@@ -589,8 +612,7 @@ const RegistrationPage: React.FC = () => {
                     <button
                       type="button"
                       className="absolute top-1 right-1 bg-red-600 rounded-full w-6 h-6 flex items-center justify-center text-white"
-                      onClick={() => handleRemovePhoto(index)}
-                    >
+                      onClick={() => handleRemovePhoto(index)}>
                       ×
                     </button>
                   </div>
@@ -599,15 +621,13 @@ const RegistrationPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleAddPhotoClick}
-                    className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-md flex flex-col items-center justify-center text-gray-500 hover:text-gray-700 hover:border-gray-400 transition-colors"
-                  >
+                    className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-md flex flex-col items-center justify-center text-gray-500 hover:text-gray-700 hover:border-gray-400 transition-colors">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-8 w-8"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                      stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -619,6 +639,9 @@ const RegistrationPage: React.FC = () => {
                   </button>
                 )}
               </div>
+              <label htmlFor="photo-upload" className="sr-only">
+                Upload photos
+              </label>
               <input
                 type="file"
                 ref={fileInputRef}
@@ -626,25 +649,25 @@ const RegistrationPage: React.FC = () => {
                 multiple
                 onChange={handlePhotoUpload}
                 className="hidden"
+                id="photo-upload"
+                aria-label="Upload photos"
+                title="Upload photos"
               />
               <p className="text-gray-500 text-sm">
-                Supported formats: JPG, PNG, GIF (max {MAX_PHOTO_SIZE_MB}MB each)
+                Supported formats: JPG, PNG, GIF (max {MAX_PHOTO_SIZE_MB}MB
+                each)
               </p>
             </div>
-            
+
             <div className="flex justify-between items-center">
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate("/invitation")}
-              >
+                onClick={() => navigate("/invitation")}>
                 Back
               </Button>
-              
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-              >
+
+              <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting && <Spinner size="sm" className="mr-2" />}
                 {isSubmitting ? "Submitting..." : "Continue to Oath"}
               </Button>

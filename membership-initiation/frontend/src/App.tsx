@@ -68,7 +68,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 // Landing page component
 const LandingPage = () => {
   const navigate = useNavigate();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showInvitationModal, setShowInvitationModal] = useState(false);
   const [membershipKey, setMembershipKey] = useState("");
@@ -79,11 +78,7 @@ const LandingPage = () => {
   const [errorReason, setErrorReason] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check for existing session
     const storedMembershipKey = localStorage.getItem("membershipKey");
-    setIsAuthenticated(!!storedMembershipKey);
-
-    // Auto-redirect after checking authentication
     if (storedMembershipKey) {
       navigate("/dashboard");
     }
@@ -217,10 +212,7 @@ const LandingPage = () => {
             alt="Space Project"
             className="h-24 mx-auto mb-6"
           />
-          <h1
-            className="text-5xl font-bold text-gray-800 mb-6"
-            style={{ fontFamily: "Arial, sans-serif" }}
-          >
+          <h1 className="text-5xl font-bold text-gray-800 mb-6 app-title">
             Membership Initiation System
           </h1>
 

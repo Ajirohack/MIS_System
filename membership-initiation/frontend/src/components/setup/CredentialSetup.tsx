@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Button, Input, Form, Alert, Spinner } from "../ui";
-import { PasswordStrengthMeter } from "../auth";
 
 interface CredentialSetupProps {
   onSubmit: (data: CredentialData) => Promise<void>;
@@ -27,6 +26,32 @@ const SECURITY_QUESTIONS = [
   "What is the name of the street you grew up on?",
   "What was the name of your first school?",
 ];
+
+const PasswordStrengthMeter: React.FC<{ password: string }> = ({ password }) => {
+  const score = (() => {
+    let s = 0;
+    if (password.length >= 8) s++;
+    if (/[A-Z]/.test(password)) s++;
+    if (/[a-z]/.test(password)) s++;
+    if (/[0-9]/.test(password)) s++;
+    if (/[^A-Za-z0-9]/.test(password)) s++;
+    return s;
+  })();
+
+  const percent = (score / 5) * 100;
+  const color = score <= 2 ? "bg-red-500" : score === 3 ? "bg-amber-500" : "bg-emerald-500";
+
+  return (
+    <div className="w-full">
+      <div className="w-full h-2 bg-gray-200 rounded">
+        <div className={`h-2 ${color} rounded`} style={{ width: `${percent}%` }} />
+      </div>
+      <div className="text-xs text-gray-600 mt-1">
+        {score <= 2 ? "Weak" : score === 3 ? "Medium" : "Strong"}
+      </div>
+    </div>
+  );
+};
 
 const CredentialSetup: React.FC<CredentialSetupProps> = ({
   onSubmit,

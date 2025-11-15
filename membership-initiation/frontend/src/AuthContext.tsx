@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from "react";
 // Import API configuration
-import { API_ENDPOINTS, getAuthHeaders } from "./config/api";
-import axios from 'axios';
+import { API_ENDPOINTS } from "./config/api";
+import axios from "axios";
 
 export interface AuthContextType {
   auth: {
@@ -15,7 +15,7 @@ export interface AuthContextType {
     login: (key: string) => Promise<void>;
     logout: () => void;
   };
-  setAuth: React.Dispatch<React.SetStateAction<AuthContextType['auth']>>;
+  setAuth: React.Dispatch<React.SetStateAction<AuthContextType["auth"]>>;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -23,7 +23,7 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }
@@ -33,7 +33,7 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [auth, setAuth] = useState<AuthContextType['auth']>({
+  const [auth, setAuth] = useState<AuthContextType["auth"]>({
     isAuthenticated: false,
     userName: null,
     error: null,
@@ -46,56 +46,56 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const response = await axios.post(
           API_ENDPOINTS.VALIDATE_KEY,
           { membership_key: key },
-          { headers: { 'Content-Type': 'application/json' } }
+          { headers: { "Content-Type": "application/json" } }
         );
 
         const data = response.data;
 
         if (data.valid) {
-          setAuth(prev => ({
+          setAuth((prev) => ({
             ...prev,
             isAuthenticated: true,
             userName: data.user_name,
             error: null,
             membershipValidated: true,
           }));
-          localStorage.setItem('membershipKey', key);
+          localStorage.setItem("membershipKey", key);
         } else {
-          setAuth(prev => ({
+          setAuth((prev) => ({
             ...prev,
             isAuthenticated: false,
             userName: null,
-            error: data.error || 'Authentication failed',
+            error: data.error || "Authentication failed",
             membershipValidated: false,
           }));
-          localStorage.removeItem('membershipKey');
+          localStorage.removeItem("membershipKey");
         }
       } catch (error) {
-        setAuth(prev => ({
+        setAuth((prev) => ({
           ...prev,
           isAuthenticated: false,
           userName: null,
-          error: 'Authentication failed',
+          error: "Authentication failed",
           membershipValidated: false,
         }));
-        localStorage.removeItem('membershipKey');
+        localStorage.removeItem("membershipKey");
       }
     },
     logout: () => {
-      setAuth(prev => ({
+      setAuth((prev) => ({
         ...prev,
         isAuthenticated: false,
         userName: null,
         error: null,
         membershipValidated: false,
       }));
-      localStorage.removeItem('membershipKey');
+      localStorage.removeItem("membershipKey");
     },
   });
 
   // Check for existing membership key on mount
   useEffect(() => {
-    const storedKey = localStorage.getItem('membershipKey');
+    const storedKey = localStorage.getItem("membershipKey");
     if (storedKey) {
       auth.login(storedKey);
     }

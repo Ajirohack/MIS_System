@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
 import { Button, Input, Form, Alert, Spinner, Card } from "../ui";
-import axios from "axios";
 
 // Import API configuration
-import { API_ENDPOINTS, getAuthHeaders } from "../../config/api";
+ 
 
 // Import official logos
 import companyLogo from "../../assets/WhyteHoux.png";
@@ -44,24 +43,13 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ membershipKey }) => {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   // Fetch user profile data on component mount
-  useEffect(() => {
-    fetchUserProfile();
-  }, [membershipKey]);
-
-  const fetchUserProfile = async () => {
+  const fetchUserProfile = useCallback(async () => {
     if (!membershipKey) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
-      // In production, this would be a real API call
-      // const response = await axios.get(
-      //   API_ENDPOINTS.GET_USER_DATA,
-      //   { headers: getAuthHeaders(membershipKey) }
-      // );
-
-      // Mock data for development
       await new Promise((resolve) => setTimeout(resolve, 500));
       const mockProfileData: UserProfile = {
         name: "Space Explorer",
@@ -80,16 +68,26 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ membershipKey }) => {
       if (mockProfileData.avatar) {
         setAvatarPreview(mockProfileData.avatar);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error fetching user profile:", err);
-      setError(
-        err.response?.data?.message ||
+      const message = ((): string => {
+        if (err instanceof Error && err.message) return err.message;
+        const maybe = err as { response?: { data?: { message?: string } } };
+        return (
+          maybe?.response?.data?.message ||
           "Failed to load profile data. Please try again."
-      );
+        );
+      })();
+      setError(message);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [membershipKey]);
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, [fetchUserProfile]);
+
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -169,12 +167,17 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ membershipKey }) => {
       setOriginalProfile({ ...profile });
 
       toast.success("Profile updated successfully");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error saving profile:", err);
-      setError(
-        err.response?.data?.message ||
+      const message = ((): string => {
+        if (err instanceof Error && err.message) return err.message;
+        const maybe = err as { response?: { data?: { message?: string } } };
+        return (
+          maybe?.response?.data?.message ||
           "Failed to save profile changes. Please try again."
-      );
+        );
+      })();
+      setError(message);
     } finally {
       setIsSaving(false);
     }
@@ -270,6 +273,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ membershipKey }) => {
                 accept="image/*"
                 onChange={handleAvatarChange}
                 className="sr-only"
+                aria-label="Upload avatar"
               />
             </div>
           </div>
@@ -348,6 +352,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ membershipKey }) => {
                 name="notifications"
                 checked={profile.notifications}
                 onChange={handleInputChange}
+                aria-label="Notifications"
               />
               <div
                 className={`relative w-11 h-6 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out ${
@@ -411,6 +416,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ membershipKey }) => {
               name="twoFactorEnabled"
               checked={profile.twoFactorEnabled}
               onChange={handleInputChange}
+              aria-label="Two-factor authentication"
             />
             <div
               className={`relative w-11 h-6 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out ${
@@ -458,7 +464,11 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ membershipKey }) => {
         </p>
 
         <div className="space-x-4">
-          <Button variant="danger" size="sm">
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-red-600 border-red-300 hover:border-red-400 hover:bg-red-50"
+          >
             Deactivate Account
           </Button>
         </div>

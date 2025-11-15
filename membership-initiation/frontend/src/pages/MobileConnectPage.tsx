@@ -17,7 +17,7 @@ const MobileConnectPage: React.FC = () => {
   const [pollingStatus, setPollingStatus] = useState<
     "pending" | "connected" | "failed"
   >("pending");
-  const [connectionId, setConnectionId] = useState<string | null>(null);
+  
 
   // Extract membership key from location state
   const membershipKey = location.state?.membershipKey;
@@ -36,7 +36,6 @@ const MobileConnectPage: React.FC = () => {
         const connectionToken = `CONN-${timestamp}-${Math.random()
           .toString(36)
           .substring(2, 10)}`;
-        setConnectionId(connectionToken);
 
         // Create QR code data including connection token and membership key
         const qrData = JSON.stringify({
@@ -109,27 +108,21 @@ const MobileConnectPage: React.FC = () => {
   return (
     <Container currentPage="Mobile Connection">
       <div className="max-w-2xl mx-auto">
-        <Button
-          variant="text"
-          className="mb-6"
-          onClick={handleBack}
-          startIcon={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
-          }
-        >
+        <Button variant="text" className="mb-6" onClick={handleBack}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 mr-2"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+          </svg>
           Back to Setup
         </Button>
 
