@@ -40,7 +40,7 @@ export const Header: React.FC<HeaderProps> = ({
     ORCHESTRATOR: "blue",
     GODFATHER: "purple",
     ENTITY: "gold",
-  };
+  } as const;
 
   const tierColor = tier
     ? tierColors[tier as keyof typeof tierColors] || "gray"

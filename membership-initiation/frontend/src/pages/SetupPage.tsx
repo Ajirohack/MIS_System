@@ -2,14 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Container } from "../components/setup";
-import { Card, Button, Alert, Spinner } from "../components/ui";
-import axios from "axios";
+import { Card, Button, Alert, Spinner, Badge } from "../components/ui";
 import CrossPlatformService, {
   Platform,
-} from "../../shared/CrossPlatformService";
+} from "../shared/CrossPlatformService";
 
-// Import logos
-import companyLogo from "../assets/WhyteHoux.png";
+ 
 
 // Initialize CrossPlatformService
 const platformService = new CrossPlatformService("web", `web-${Date.now()}`);
@@ -18,7 +16,6 @@ const SetupPage: React.FC = () => {
   const navigate = useNavigate();
   const [membershipKey, setMembershipKey] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [userName, setUserName] = useState<string>("Member");
   const [connectedPlatforms, setConnectedPlatforms] = useState<Platform[]>([]);
@@ -216,7 +213,7 @@ const SetupPage: React.FC = () => {
   };
 
   return (
-    <Container currentPage="Setup">
+    <Container>
       <div className="max-w-4xl mx-auto">
         {/* Time remaining indicator */}
         {timeRemaining !== null && (
@@ -227,8 +224,7 @@ const SetupPage: React.FC = () => {
                 className="h-5 w-5 text-amber-500 mr-2"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
+                stroke="currentColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -269,15 +265,13 @@ const SetupPage: React.FC = () => {
               <button
                 onClick={copyMembershipKey}
                 className="text-emerald-600 hover:text-emerald-700"
-                title="Copy to clipboard"
-              >
+                title="Copy to clipboard">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
+                  stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -311,8 +305,7 @@ const SetupPage: React.FC = () => {
                     <svg
                       viewBox="0 0 32 32"
                       xmlns="http://www.w3.org/2000/svg"
-                      className="text-blue-500"
-                    >
+                      className="text-blue-500">
                       <path
                         d="M16 0.5c-8.563 0-15.5 6.937-15.5 15.5s6.937 15.5 15.5 15.5c8.563 0 15.5-6.937 15.5-15.5s-6.937-15.5-15.5-15.5zM23.613 11.119l-2.544 11.988c-0.188 0.85-0.694 1.056-1.4 0.656l-3.875-2.856-1.869 1.8c-0.206 0.206-0.381 0.381-0.781 0.381l0.275-3.944 7.181-6.488c0.313-0.275-0.069-0.431-0.482-0.156l-8.875 5.587-3.825-1.194c-0.831-0.262-0.85-0.831 0.175-1.231l14.944-5.763c0.694-0.25 1.3 0.169 1.075 1.219z"
                         fill="currentColor"
@@ -337,8 +330,7 @@ const SetupPage: React.FC = () => {
                       className="h-5 w-5 text-emerald-500 mr-2 flex-shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                      stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -354,8 +346,7 @@ const SetupPage: React.FC = () => {
                       className="h-5 w-5 text-emerald-500 mr-2 flex-shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                      stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -371,8 +362,7 @@ const SetupPage: React.FC = () => {
                       className="h-5 w-5 text-emerald-500 mr-2 flex-shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                      stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -386,13 +376,12 @@ const SetupPage: React.FC = () => {
                 <Button
                   onClick={connectTelegram}
                   fullWidth
-                  variant={
+                variant={
                     connectedPlatforms.includes("telegram-bot")
                       ? "outline"
-                      : "default"
+                      : "primary"
                   }
-                  disabled={isLoading}
-                >
+                  disabled={isLoading}>
                   {isLoading ? <Spinner size="sm" className="mr-2" /> : null}
                   {connectedPlatforms.includes("telegram-bot")
                     ? "Reconnect Telegram"
@@ -409,8 +398,7 @@ const SetupPage: React.FC = () => {
                       className="h-5 w-5"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                      stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -437,8 +425,7 @@ const SetupPage: React.FC = () => {
                       className="h-5 w-5 text-emerald-500 mr-2 flex-shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                      stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -454,8 +441,7 @@ const SetupPage: React.FC = () => {
                       className="h-5 w-5 text-emerald-500 mr-2 flex-shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                      stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -471,8 +457,7 @@ const SetupPage: React.FC = () => {
                       className="h-5 w-5 text-emerald-500 mr-2 flex-shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                      stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -486,11 +471,10 @@ const SetupPage: React.FC = () => {
                 <Button
                   onClick={connectWebBot}
                   variant={
-                    connectedPlatforms.includes("web") ? "outline" : "default"
+                    connectedPlatforms.includes("web") ? "outline" : "primary"
                   }
                   fullWidth
-                  disabled={isLoading}
-                >
+                  disabled={isLoading}>
                   {isLoading ? <Spinner size="sm" className="mr-2" /> : null}
                   {connectedPlatforms.includes("web")
                     ? "Reconnect Web Interface"
@@ -507,8 +491,7 @@ const SetupPage: React.FC = () => {
                       className="h-5 w-5"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                      stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -535,8 +518,7 @@ const SetupPage: React.FC = () => {
                       className="h-5 w-5 text-emerald-500 mr-2 flex-shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                      stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -552,8 +534,7 @@ const SetupPage: React.FC = () => {
                       className="h-5 w-5 text-emerald-500 mr-2 flex-shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                      stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -569,8 +550,7 @@ const SetupPage: React.FC = () => {
                       className="h-5 w-5 text-emerald-500 mr-2 flex-shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                      stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -586,11 +566,10 @@ const SetupPage: React.FC = () => {
                   variant={
                     connectedPlatforms.includes("mobile-app")
                       ? "outline"
-                      : "default"
+                      : "primary"
                   }
                   fullWidth
-                  disabled={isLoading}
-                >
+                  disabled={isLoading}>
                   {isLoading ? <Spinner size="sm" className="mr-2" /> : null}
                   {connectedPlatforms.includes("mobile-app")
                     ? "Reconnect Mobile App"
@@ -607,8 +586,7 @@ const SetupPage: React.FC = () => {
                       className="h-5 w-5"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                      stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -635,8 +613,7 @@ const SetupPage: React.FC = () => {
                       className="h-5 w-5 text-emerald-500 mr-2 flex-shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                      stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -652,8 +629,7 @@ const SetupPage: React.FC = () => {
                       className="h-5 w-5 text-emerald-500 mr-2 flex-shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                      stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -669,8 +645,7 @@ const SetupPage: React.FC = () => {
                       className="h-5 w-5 text-emerald-500 mr-2 flex-shrink-0"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                      stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -686,11 +661,10 @@ const SetupPage: React.FC = () => {
                   variant={
                     connectedPlatforms.includes("browser-extension")
                       ? "outline"
-                      : "default"
+                      : "primary"
                   }
                   fullWidth
-                  disabled={isLoading}
-                >
+                  disabled={isLoading}>
                   {isLoading ? <Spinner size="sm" className="mr-2" /> : null}
                   {connectedPlatforms.includes("browser-extension")
                     ? "Reinstall Extension"
@@ -707,8 +681,7 @@ const SetupPage: React.FC = () => {
                 className="h-5 w-5 text-blue-600 mr-2 mt-0.5"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
+                stroke="currentColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -736,8 +709,7 @@ const SetupPage: React.FC = () => {
             </p>
             <Button
               variant="text"
-              onClick={() => toast.info("Support contact would be shown here")}
-            >
+              onClick={() => toast.info("Support contact would be shown here")}>
               Contact Support
             </Button>
           </div>

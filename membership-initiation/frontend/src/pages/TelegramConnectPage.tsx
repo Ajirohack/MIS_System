@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Container } from "../components/setup";
 import { Card, Button, Alert, Spinner, Badge } from "../components/ui";
 import { QRCodeDisplay } from "../components/dashboard";
 
-// Import Telegram logo
-import telegramLogo from "../assets/telegram-logo.svg";
+
 
 const TelegramConnectPage: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [connectionCode, setConnectionCode] = useState<string | null>(null);
   const [qrCodeData, setQrCodeData] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,7 +39,7 @@ const TelegramConnectPage: React.FC = () => {
         setQrCodeData(telegramBotUrl);
 
         // Start polling for connection status
-        startPollingConnectionStatus(generatedCode);
+        startPollingConnectionStatus();
 
         // Start countdown timer
         startCountdown();
@@ -57,12 +55,12 @@ const TelegramConnectPage: React.FC = () => {
   }, [membershipKey, navigate]);
 
   // Poll for connection status
-  const startPollingConnectionStatus = (code: string) => {
+  const startPollingConnectionStatus = () => {
     // In a real implementation, this would make API calls to check connection status
     const interval = setInterval(() => {
       // Simulate API call to check status
       // In production, this would be:
-      // const response = await axios.get(`${API_URL}/telegram/connections/${code}/status`);
+      // const response = await axios.get(`${API_URL}/telegram/connections/status`);
 
       // Simulate connection after 20 seconds for demo purposes
       setTimeout(() => {
@@ -152,7 +150,7 @@ const TelegramConnectPage: React.FC = () => {
       const telegramBotUrl = `https://t.me/SpaceNewBot?start=${generatedCode}`;
       setQrCodeData(telegramBotUrl);
 
-      startPollingConnectionStatus(generatedCode);
+        startPollingConnectionStatus();
       startCountdown();
 
       setIsLoading(false);
@@ -160,29 +158,23 @@ const TelegramConnectPage: React.FC = () => {
   };
 
   return (
-    <Container currentPage="Telegram Connection">
+    <Container>
       <div className="max-w-2xl mx-auto">
-        <Button
-          variant="text"
-          className="mb-6"
-          onClick={handleBack}
-          startIcon={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
-          }
-        >
+        <Button variant="text" className="mb-6" onClick={handleBack}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 mr-2"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+          </svg>
           Back to Setup
         </Button>
 
@@ -253,7 +245,7 @@ const TelegramConnectPage: React.FC = () => {
               <div className="mb-8">
                 <div className="flex justify-between items-center mb-2">
                   <h3 className="font-medium">Connection Code:</h3>
-                  <Badge color="amber">
+                  <Badge color="gold">
                     Expires in {formatTimeRemaining()}
                   </Badge>
                 </div>
@@ -330,19 +322,17 @@ const TelegramConnectPage: React.FC = () => {
                       variant="outline"
                       className="mt-auto"
                       fullWidth
-                      startIcon={
-                        <svg
-                          viewBox="0 0 32 32"
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="text-blue-500 h-5 w-5"
-                        >
-                          <path
-                            d="M16 0.5c-8.563 0-15.5 6.937-15.5 15.5s6.937 15.5 15.5 15.5c8.563 0 15.5-6.937 15.5-15.5s-6.937-15.5-15.5-15.5zM23.613 11.119l-2.544 11.988c-0.188 0.85-0.694 1.056-1.4 0.656l-3.875-2.856-1.869 1.8c-0.206 0.206-0.381 0.381-0.781 0.381l0.275-3.944 7.181-6.488c0.313-0.275-0.069-0.431-0.482-0.156l-8.875 5.587-3.825-1.194c-0.831-0.262-0.85-0.831 0.175-1.231l14.944-5.763c0.694-0.25 1.3 0.169 1.075 1.219z"
-                            fill="currentColor"
-                          />
-                        </svg>
-                      }
                     >
+                      <svg
+                        viewBox="0 0 32 32"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="text-blue-500 h-5 w-5 mr-2"
+                      >
+                        <path
+                          d="M16 0.5c-8.563 0-15.5 6.937-15.5 15.5s6.937 15.5 15.5 15.5c8.563 0 15.5-6.937 15.5-15.5s-6.937-15.5-15.5-15.5zM23.613 11.119l-2.544 11.988c-0.188 0.85-0.694 1.056-1.4 0.656l-3.875-2.856-1.869 1.8c-0.206 0.206-0.381 0.381-0.781 0.381l0.275-3.944 7.181-6.488c0.313-0.275-0.069-0.431-0.482-0.156l-8.875 5.587-3.825-1.194c-0.831-0.262-0.85-0.831 0.175-1.231l14.944-5.763c0.694-0.25 1.3 0.169 1.075 1.219z"
+                          fill="currentColor"
+                        />
+                      </svg>
                       Open @SpaceNewBot
                     </Button>
                   </div>

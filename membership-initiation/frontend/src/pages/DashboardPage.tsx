@@ -6,7 +6,7 @@ import axios from "axios";
 import CrossPlatformService, {
   Platform,
   PlatformConnection,
-} from "../../shared/CrossPlatformService";
+} from "../shared/CrossPlatformService";
 
 // Assumed components - would be imported from your component library
 import {
@@ -16,7 +16,6 @@ import {
   Spinner,
   Badge,
   Tabs,
-  Tab,
   Modal,
 } from "../components/ui";
 import { Container, Header, Footer } from "../components/layout";
@@ -35,8 +34,6 @@ import { toast } from "react-toastify";
 import { API_ENDPOINTS, getAuthHeaders } from "../config/api";
 
 // Import official logos
-import companyLogo from "../assets/WhyteHoux.png";
-import projectLogo from "../assets/PNG image 5.png";
 
 // Initialize CrossPlatformService
 const platformService = new CrossPlatformService("web", `web-${Date.now()}`);
@@ -78,12 +75,7 @@ const DashboardPage: React.FC = () => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [qrCodeData, setQrCodeData] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("overview");
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [notification, setNotification] = useState<{
-    type: string;
-    message: string;
-  } | null>(null);
 
   // Platform connections
   const [connectedPlatforms, setConnectedPlatforms] = useState<
@@ -134,12 +126,11 @@ const DashboardPage: React.FC = () => {
 
   // API Integration Methods
   const fetchUserData = async (key: string) => {
-    setIsLoading(true);
     setError(null);
 
-    try {
+  try {
       const response = await axios.post(
-        `${API_ENDPOINTS.VALIDATE_MEMBERSHIP_KEY}`,
+        API_ENDPOINTS.VALIDATE_KEY,
         { membership_key: key },
         {
           headers: getAuthHeaders(key),
@@ -167,7 +158,6 @@ const DashboardPage: React.FC = () => {
       setError("Error connecting to the server. Please try again later.");
       setUserData(null);
     } finally {
-      setIsLoading(false);
     }
   };
 
@@ -181,10 +171,7 @@ const DashboardPage: React.FC = () => {
       updateToolsFromConnections(platforms);
     } catch (err) {
       console.error("Error fetching connected platforms:", err);
-      setNotification({
-        type: "error",
-        message: "Failed to load connected platforms. Please refresh the page.",
-      });
+      toast.error("Failed to load connected platforms. Please refresh the page.");
     }
   };
 
@@ -259,10 +246,7 @@ const DashboardPage: React.FC = () => {
       ]);
     } catch (err) {
       console.error("Error fetching tools:", err);
-      setNotification({
-        type: "error",
-        message: "Failed to load tools. Please refresh the page.",
-      });
+      toast.error("Failed to load tools. Please refresh the page.");
     }
   };
 
@@ -311,40 +295,40 @@ const DashboardPage: React.FC = () => {
   };
 
   const generateQRCode = async () => {
-    // Generate temporary connection data
+    const connectionToken = `CONN-${Date.now()}-${Math.random()
+      .toString(36)
+      .substring(2, 10)}`;
+
     const connectionData = {
       membershipKey,
       timestamp: Date.now(),
       type: "space_mobile_connection",
-      expires: Date.now() + 300000, // 5-minute expiry
+      expires: Date.now() + 300000,
+      connectionToken,
     };
 
-    // Simulate API call to generate a secure connection token
-    const connectionToken = `CONN-${Date.now()}-${Math.random()
-      .toString(36)
-      .substring(2, 10)}`;
-    connectionData["connectionToken"] = connectionToken;
-
-    // Stringify the data for QR code
     setQrCodeData(JSON.stringify(connectionData));
   };
 
-  // Handle tool click - special handling for connection tools
-  const handleToolClick = (tool: Tool) => {
-    if (tool.id === "connector") {
-      if (!tool.enabled) {
-        // Show platform connection modal
-        setPlatformToConnect("telegram-bot");
-        setShowConnectModal(true);
-      } else {
-        // Open Telegram bot if already connected
-        window.open("https://t.me/SpaceNewBot", "_blank");
-      }
-    } else {
-      // Handle other tools
-      toast.info(`Opening ${tool.name}...`);
-      // Normally would navigate to the tool or open it in a new tab
-    }
+
+  const toggleTool = (id: string, enabled: boolean) => {
+    setTools((prev) =>
+      prev.map((tool) => (tool.id === id ? { ...tool, enabled } : tool))
+    );
+  };
+
+  const connectTelegramBot = () => {
+    setPlatformToConnect("telegram-bot");
+    setShowConnectModal(true);
+  };
+
+  const handleLogout = () => {
+    platformService.logout();
+    localStorage.removeItem("membershipKey");
+    setUserData(null);
+    setTools([]);
+    setActivities([]);
+    navigate("/");
   };
 
   // Connect a platform
@@ -423,8 +407,7 @@ const DashboardPage: React.FC = () => {
           setPlatformToConnect(null);
           setConnectionCode(null);
         }}
-        title={`Connect ${platformToConnect}`}
-      >
+        title={`Connect ${platformToConnect}`}>
         {connectionLoading ? (
           <div className="flex flex-col items-center p-6">
             <Spinner size="lg" className="mb-4" />
@@ -456,8 +439,7 @@ const DashboardPage: React.FC = () => {
             <Button
               variant="primary"
               fullWidth
-              onClick={() => window.open("https://t.me/SpaceNewBot", "_blank")}
-            >
+              onClick={() => window.open("https://t.me/SpaceNewBot", "_blank")}>
               Open Telegram Bot
             </Button>
           </div>
@@ -470,8 +452,7 @@ const DashboardPage: React.FC = () => {
             <Button
               variant="primary"
               fullWidth
-              onClick={() => connectPlatform(platformToConnect)}
-            >
+              onClick={() => connectPlatform(platformToConnect)}>
               Connect {platformToConnect}
             </Button>
           </div>
@@ -493,8 +474,7 @@ const DashboardPage: React.FC = () => {
             size="sm"
             onClick={() => {
               navigate("/setup");
-            }}
-          >
+            }}>
             Add Platform
           </Button>
         </div>
@@ -512,8 +492,7 @@ const DashboardPage: React.FC = () => {
               {connectedPlatforms.map((conn) => (
                 <div
                   key={conn.id}
-                  className="py-3 flex justify-between items-center"
-                >
+                  className="py-3 flex justify-between items-center">
                   <div className="flex items-center">
                     <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-3">
                       {conn.platform === "web" && (
@@ -543,15 +522,13 @@ const DashboardPage: React.FC = () => {
                     <button
                       className="ml-4 text-gray-400 hover:text-red-500"
                       onClick={() => disconnectPlatform(conn.id, conn.platform)}
-                      title="Disconnect"
-                    >
+                      title="Disconnect">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="h-5 w-5"
                         fill="none"
                         viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
+                        stroke="currentColor">
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -617,7 +594,6 @@ const DashboardPage: React.FC = () => {
               onConnect={
                 tool.id === "connector" ? connectTelegramBot : undefined
               }
-              onClick={() => handleToolClick(tool)}
             />
           ))}
         </div>
@@ -670,8 +646,7 @@ const DashboardPage: React.FC = () => {
                     : userData?.tier === "ORCHESTRATOR"
                     ? "blue"
                     : "gray"
-                }
-              >
+                }>
                 {userData?.tier}
               </Badge>
             </div>

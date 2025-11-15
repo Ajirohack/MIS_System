@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import axios from "axios";
 
 // Import components
 import { Container } from "../components/setup";
 import { Card, Button, Checkbox, Alert, Spinner } from "../components/ui";
 
-// Import API configuration
-import { API_ENDPOINTS } from "../config/api";
+ 
 
 // Oath statement text
 const OATH_TEXT = `I solemnly swear to uphold the principles and values of Space. 
@@ -123,7 +121,7 @@ const OathPage: React.FC = () => {
       recordingTimerRef.current = setInterval(() => {
         setRecordingDuration((prev) => prev + 1);
       }, 1000);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Error accessing microphone:", err);
       setError(
         "Unable to access your microphone. Please check your browser permissions and try again."
@@ -165,7 +163,7 @@ const OathPage: React.FC = () => {
       // Mock success
       setIsVerified(true);
       toast.success("Oath recording verified successfully!");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error verifying audio:", err);
       setError("Failed to verify your oath recording. Please try again.");
       setIsVerified(false);
@@ -245,12 +243,17 @@ const OathPage: React.FC = () => {
 
       toast.success("Application submitted successfully!");
       navigate("/submission-confirmation");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error submitting application:", err);
-      setError(
-        err.response?.data?.message ||
+      const message = ((): string => {
+        if (err instanceof Error && err.message) return err.message;
+        const maybe = err as { response?: { data?: { message?: string } } };
+        return (
+          maybe?.response?.data?.message ||
           "Failed to submit your application. Please try again."
-      );
+        );
+      })();
+      setError(message);
     } finally {
       setIsLoading(false);
     }
@@ -365,6 +368,7 @@ const OathPage: React.FC = () => {
                       <button
                         onClick={startRecording}
                         className="w-24 h-24 bg-emerald-100 hover:bg-emerald-200 rounded-full flex items-center justify-center mb-5 focus:outline-none focus:ring-4 focus:ring-emerald-200 transition-all duration-300 transform hover:scale-105 hover:shadow-membership"
+                        aria-label="Start recording"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
